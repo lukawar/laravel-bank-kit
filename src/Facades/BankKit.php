@@ -3,6 +3,7 @@
 namespace lukawar\BankKit\Facades;
 
 use Illuminate\Support\Facades\Facade;
+use lukawar\BankKit\Services\BankKitService;
 
 /**
  * @method static array generateElixirFiles(\Illuminate\Support\Collection $transfers)
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \lukawar\BankKit\Contracts\PaymentGatewayInterface gateway(string $identifier)
  * @method static array getGateways()
  *
- * @see \lukawar\BankKit\Services\BankKitService
+ * @see BankKitService
  */
 class BankKit extends Facade
 {
