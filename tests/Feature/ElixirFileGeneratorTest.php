@@ -3,6 +3,7 @@
 namespace lukawar\BankKit\Tests\Feature;
 
 use Carbon\Carbon;
+use DateTimeImmutable;
 use lukawar\BankKit\DTOs\SplitPaymentTransfer;
 use lukawar\BankKit\DTOs\StandardTransfer;
 use lukawar\BankKit\DTOs\TaxOfficeTransfer;
@@ -69,6 +70,46 @@ class ElixirFileGeneratorTest extends TestCase
         $decodedContent = iconv('CP852', 'UTF-8', $files[0]);
 
         $this->assertStringContainsString('20240326', $decodedContent);
+    }
+
+    public function test_execution_date_accepts_any_date_time_implementation(): void
+    {
+        $transfer = new StandardTransfer(
+            senderAccount: '58249000050000460073649930',
+            senderName: 'Firma Testowa',
+            senderAddress: 'ul. Testowa 1|00-001 Warszawa',
+            recipientAccount: '12345678901234567890123456',
+            recipientName: 'Kontrahent',
+            recipientAddress: 'ul. Odbiorcza 2|00-002 Warszawa',
+            amountInGrosze: 531200,
+            executionDate: new DateTimeImmutable('2024-03-26'),
+            title: 'Faktura VAT 1/2024',
+        );
+
+        $files = $this->generator->generate(collect([$transfer]));
+
+        $this->assertStringContainsString(',20240326,', iconv('CP852', 'UTF-8', $files[0]));
+    }
+
+    public function test_a_quote_and_a_line_break_in_user_data_keep_one_record_of_15_fields(): void
+    {
+        $transfer = new StandardTransfer(
+            senderAccount: '58249000050000460073649930',
+            senderName: 'Firma Testowa',
+            senderAddress: 'ul. Testowa 1|00-001 Warszawa',
+            recipientAccount: '12345678901234567890123456',
+            recipientName: 'Kontrahent "Alfa"',
+            recipientAddress: 'ul. Odbiorcza 2|00-002 Warszawa',
+            amountInGrosze: 531200,
+            executionDate: Carbon::parse('2024-03-26'),
+            title: "FV 1/2024\r\n110,20240326,1",
+        );
+
+        $files = $this->generator->generate(collect([$transfer]));
+        $lines = explode("\r\n", trim(iconv('CP852', 'UTF-8', $files[0])));
+
+        $this->assertCount(1, $lines);
+        $this->assertCount(15, str_getcsv($lines[0], escape: '\\'));
     }
 
     public function test_generated_line_contains_amount_in_grosze(): void
@@ -181,7 +222,7 @@ class ElixirFileGeneratorTest extends TestCase
         $decodedContent = iconv('CP852', 'UTF-8', $files[0]);
 
         $firstLine = explode("\r\n", trim($decodedContent))[0];
-        $fieldCount = count(str_getcsv($firstLine));
+        $fieldCount = count(str_getcsv($firstLine, escape: '\\'));
 
         $this->assertSame(15, $fieldCount);
     }

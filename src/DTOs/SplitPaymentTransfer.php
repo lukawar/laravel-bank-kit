@@ -2,7 +2,7 @@
 
 namespace lukawar\BankKit\DTOs;
 
-use Carbon\Carbon;
+use DateTimeInterface;
 use lukawar\BankKit\Enums\TransferType;
 
 class SplitPaymentTransfer extends AbstractBankTransfer
@@ -15,7 +15,7 @@ class SplitPaymentTransfer extends AbstractBankTransfer
         string $recipientName,
         string $recipientAddress,
         int $amountInGrosze,
-        Carbon $executionDate,
+        DateTimeInterface $executionDate,
         private readonly string $title,
     ) {
         parent::__construct(

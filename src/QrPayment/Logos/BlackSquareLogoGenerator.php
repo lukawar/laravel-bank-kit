@@ -16,12 +16,19 @@ class BlackSquareLogoGenerator
             throw new RuntimeException('The GD extension is required to generate the default black square logo.');
         }
 
+        $path = sys_get_temp_dir()."/bank-kit-default-logo-{$squareSize}.png";
+
+        if (is_file($path)) {
+            return $path;
+        }
+
         $image = imagecreate($squareSize, $squareSize);
         imagecolorallocate($image, 0, 0, 0);
 
-        $path = sys_get_temp_dir().'/bank-kit-default-logo.png';
-        imagepng($image, $path);
-        imagedestroy($image);
+        // Written aside and renamed, so a concurrent request never reads a half-written file.
+        $temporaryPath = tempnam(sys_get_temp_dir(), 'bank-kit-logo-');
+        imagepng($image, $temporaryPath);
+        rename($temporaryPath, $path);
 
         return $path;
     }

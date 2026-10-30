@@ -2,7 +2,7 @@
 
 namespace lukawar\BankKit\DTOs;
 
-use Carbon\Carbon;
+use DateTimeInterface;
 use lukawar\BankKit\Enums\TransferType;
 
 class ZusTransfer extends AbstractBankTransfer
@@ -15,7 +15,7 @@ class ZusTransfer extends AbstractBankTransfer
         string $recipientName,
         string $recipientAddress,
         int $amountInGrosze,
-        Carbon $executionDate,
+        DateTimeInterface $executionDate,
         private readonly string $contributionPeriod,
     ) {
         parent::__construct(

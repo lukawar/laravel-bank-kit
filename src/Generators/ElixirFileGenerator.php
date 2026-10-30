@@ -45,7 +45,7 @@ class ElixirFileGenerator
             fn (BankTransferInterface $transfer) => $transfer->getTransferType() === TransferType::SplitPayment
         );
 
-        return $hasSplitPayment ? 'pls' : 'pli';
+        return ($hasSplitPayment ? TransferType::SplitPayment : TransferType::Standard)->fileExtension();
     }
 
     /**

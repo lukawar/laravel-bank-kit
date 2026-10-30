@@ -2,7 +2,7 @@
 
 namespace lukawar\BankKit\DTOs;
 
-use Carbon\Carbon;
+use DateTimeInterface;
 use lukawar\BankKit\Contracts\BankTransferInterface;
 use lukawar\BankKit\Enums\TransferType;
 
@@ -16,7 +16,7 @@ abstract class AbstractBankTransfer implements BankTransferInterface
         protected readonly string $recipientName,
         protected readonly string $recipientAddress,
         protected readonly int $amountInGrosze,
-        protected readonly Carbon $executionDate,
+        protected readonly DateTimeInterface $executionDate,
     ) {}
 
     abstract public function getTransferType(): TransferType;
@@ -58,7 +58,7 @@ abstract class AbstractBankTransfer implements BankTransferInterface
         return $this->amountInGrosze;
     }
 
-    public function getExecutionDate(): Carbon
+    public function getExecutionDate(): DateTimeInterface
     {
         return $this->executionDate;
     }

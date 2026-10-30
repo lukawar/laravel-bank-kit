@@ -6,8 +6,8 @@ A Laravel package for generating Polish bank transfer files (ELIXIR format) and 
 
 ## Requirements
 
-- PHP 8.2+
-- Laravel 11+
+- PHP 8.2+ (8.3+ for Laravel 13)
+- Laravel 11, 12 or 13
 - `ext-iconv` (for CP852 encoding in ELIXIR files)
 - `ext-gd` or `ext-imagick` (required only when using QR codes with embedded logos)
 
@@ -331,6 +331,14 @@ $generator = new QrPaymentGenerator(
     new SepaQrPaymentFormatter(),
     new EndroidSvgRenderer(),
 );
+```
+
+Or swap them for the whole application — the injected `QrPaymentGenerator` picks them up:
+
+```php
+// AppServiceProvider::register()
+$this->app->bind(QrPaymentFormatterInterface::class, SepaQrPaymentFormatter::class);
+$this->app->bind(QrCodeRendererInterface::class, EndroidPngRenderer::class);
 ```
 
 ---

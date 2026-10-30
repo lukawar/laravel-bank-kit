@@ -2,7 +2,7 @@
 
 namespace lukawar\BankKit\DTOs;
 
-use Carbon\Carbon;
+use DateTimeInterface;
 use lukawar\BankKit\Enums\TaxPeriodType;
 use lukawar\BankKit\Enums\TransferType;
 
@@ -16,7 +16,7 @@ class TaxOfficeTransfer extends AbstractBankTransfer
         string $recipientName,
         string $recipientAddress,
         int $amountInGrosze,
-        Carbon $executionDate,
+        DateTimeInterface $executionDate,
         private readonly string $taxpayerNip,
         private readonly TaxPeriodType $periodType,
         private readonly string $periodNumber,

@@ -5,6 +5,8 @@ namespace lukawar\BankKit;
 use Illuminate\Support\ServiceProvider;
 use lukawar\BankKit\Formatters\ElixirFormatter;
 use lukawar\BankKit\Generators\ElixirFileGenerator;
+use lukawar\BankKit\QrPayment\Contracts\QrCodeRendererInterface;
+use lukawar\BankKit\QrPayment\Contracts\QrPaymentFormatterInterface;
 use lukawar\BankKit\QrPayment\DTOs\QrLogo;
 use lukawar\BankKit\QrPayment\Formatters\PolishQrPaymentFormatter;
 use lukawar\BankKit\QrPayment\Generators\QrPaymentGenerator;
@@ -22,27 +24,15 @@ class BankKitServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(ElixirFormatter::class);
+        $this->app->singleton(ElixirFileGenerator::class);
 
-        $this->app->singleton(ElixirFileGenerator::class, function ($app) {
-            return new ElixirFileGenerator(
-                formatter: $app->make(ElixirFormatter::class),
-            );
-        });
+        // Defaults only — an application swaps the QR format or renderer by binding its own.
+        $this->app->bindIf(QrPaymentFormatterInterface::class, PolishQrPaymentFormatter::class);
+        $this->app->bindIf(QrCodeRendererInterface::class, EndroidSvgRenderer::class);
+        $this->app->singleton(QrPaymentGenerator::class);
 
-        $this->app->singleton(QrPaymentGenerator::class, function () {
-            return new QrPaymentGenerator(
-                formatter: new PolishQrPaymentFormatter,
-                renderer: new EndroidSvgRenderer,
-            );
-        });
-
-        $this->app->singleton('bank-kit', function ($app) {
-            return new BankKitService(
-                elixirFileGenerator: $app->make(ElixirFileGenerator::class),
-                qrPaymentGenerator: $app->make(QrPaymentGenerator::class),
-            );
-        });
-
+        // build(), not make(): the alias below points the class back at 'bank-kit'.
+        $this->app->singleton('bank-kit', fn ($app) => $app->build(BankKitService::class));
         $this->app->alias('bank-kit', BankKitService::class);
     }
 

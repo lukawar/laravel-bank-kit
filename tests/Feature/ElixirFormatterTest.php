@@ -2,6 +2,7 @@
 
 namespace lukawar\BankKit\Tests\Feature;
 
+use lukawar\BankKit\Exceptions\ElixirEncodingException;
 use lukawar\BankKit\Formatters\ElixirFormatter;
 use PHPUnit\Framework\TestCase;
 
@@ -60,5 +61,22 @@ class ElixirFormatterTest extends TestCase
     public function test_an_empty_text_yields_four_empty_segments(): void
     {
         $this->assertSame('|||', $this->formatter->formatMultiline(''));
+    }
+
+    public function test_a_double_quote_inside_a_value_cannot_close_the_field(): void
+    {
+        $this->assertSame('"Firma \'Alfa\' Sp. z o.o."', $this->formatter->quoted('Firma "Alfa" Sp. z o.o.'));
+    }
+
+    public function test_a_line_break_inside_a_value_cannot_start_a_new_record(): void
+    {
+        $this->assertSame('"FV 1/2024  110,20240326"', $this->formatter->quoted("FV 1/2024\r\n110,20240326"));
+    }
+
+    public function test_invalid_utf8_fails_with_an_explicit_exception(): void
+    {
+        $this->expectException(ElixirEncodingException::class);
+
+        $this->formatter->encodeToCP852("Faktura \xC3\x28");
     }
 }

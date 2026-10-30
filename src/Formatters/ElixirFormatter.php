@@ -2,6 +2,8 @@
 
 namespace lukawar\BankKit\Formatters;
 
+use lukawar\BankKit\Exceptions\ElixirEncodingException;
+
 class ElixirFormatter
 {
     private const SEGMENT_LENGTH = 35;
@@ -23,9 +25,7 @@ class ElixirFormatter
      */
     public function normalizeAccount(string $accountNumber): string
     {
-        $digits = preg_replace('/[^0-9PL\s]/', '', $accountNumber);
-
-        return preg_replace('/[^0-9]/', '', $digits);
+        return preg_replace('/[^0-9]/', '', $accountNumber);
     }
 
     /**
@@ -60,17 +60,31 @@ class ElixirFormatter
 
     /**
      * Wraps value in double quotes.
+     *
+     * The format has no escaping: a double quote or a line break inside a value
+     * would end the field or the whole record, so both are replaced one-to-one.
      */
     public function quoted(string $value): string
     {
+        $value = str_replace('"', "'", $value);
+        $value = preg_replace('/[\x00-\x1F\x7F]/u', ' ', $value) ?? $value;
+
         return '"'.$value.'"';
     }
 
     /**
      * Encodes string content to CP852 using iconv (mbstring does not support CP852).
+     *
+     * @throws ElixirEncodingException
      */
     public function encodeToCP852(string $content): string
     {
-        return iconv('UTF-8', 'CP852//TRANSLIT', $content);
+        $encoded = @iconv('UTF-8', 'CP852//TRANSLIT', $content);
+
+        if ($encoded === false) {
+            throw new ElixirEncodingException('Content cannot be encoded to CP852 — it is not valid UTF-8.');
+        }
+
+        return $encoded;
     }
 }

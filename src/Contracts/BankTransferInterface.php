@@ -2,7 +2,7 @@
 
 namespace lukawar\BankKit\Contracts;
 
-use Carbon\Carbon;
+use DateTimeInterface;
 use lukawar\BankKit\Enums\TransferType;
 
 interface BankTransferInterface
@@ -25,5 +25,5 @@ interface BankTransferInterface
 
     public function getAmountInGrosze(): int;
 
-    public function getExecutionDate(): Carbon;
+    public function getExecutionDate(): DateTimeInterface;
 }
